@@ -956,12 +956,19 @@ export async function monitorWebProvider(
       }`;
 
       // Wrap with standardized envelope for the agent.
+      let fromField: string;
+      if (msg.chatType === "group") {
+        // Group messages: show group JID as sender
+        fromField = msg.from;
+      } else {
+        // Direct messages: show sender, with "(sent)" prefix if fromMe
+        const prefix = msg.fromMe ? "(sent) " : "from:";
+        fromField = `${prefix}${msg.from?.replace(/^whatsapp:/, "")}`;
+      }
+
       return formatAgentEnvelope({
         surface: "WhatsApp",
-        from:
-          msg.chatType === "group"
-            ? msg.from
-            : msg.from?.replace(/^whatsapp:/, ""),
+        from: fromField,
         timestamp: msg.timestamp,
         body: baseLine,
       });

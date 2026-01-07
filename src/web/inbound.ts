@@ -63,6 +63,7 @@ export type WebInboundMessage = {
   mediaType?: string;
   mediaUrl?: string;
   wasMentioned?: boolean;
+  fromMe?: boolean; // true if message was sent by self, false if received
 };
 
 export async function monitorWebInbox(options: {
@@ -137,6 +138,7 @@ export async function monitorWebInbox(options: {
       if (id && seen.has(id)) continue;
       if (id) seen.add(id);
       // Note: not filtering fromMe here - echo detection happens in auto-reply layer
+      const fromMe = msg.key?.fromMe ?? false;
       const remoteJid = msg.key?.remoteJid;
       if (!remoteJid) continue;
       // Ignore status/broadcast traffic; we only care about direct chats.
@@ -283,6 +285,7 @@ export async function monitorWebInbox(options: {
             mentionedJids: mentionedJids ?? undefined,
             selfJid,
             selfE164,
+            fromMe,
             sendComposing,
             reply,
             sendMedia,
